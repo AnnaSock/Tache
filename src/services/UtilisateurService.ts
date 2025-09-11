@@ -1,0 +1,53 @@
+import { Utilisateur } from "@prisma/client";
+import { UtilisateurRepository } from "../repositories/UtilisateurRepository.js";
+import bcrypt from "bcrypt";
+import { UserLogin } from "../types/typeUser.js";
+import JWT from "jsonwebtoken";
+import { env } from "../config/env.js";
+
+export class UtilisateurService {
+  private userRepo: UtilisateurRepository = new UtilisateurRepository();
+
+  async create(data: Omit<Utilisateur, "id">): Promise<Utilisateur> {
+    const hashpassword = await bcrypt.hash(data.password, 10);
+    const newUser = this.userRepo.create({ ...data, password: hashpassword });
+    return newUser;
+  }
+
+  async findAll(): Promise<Utilisateur[]> {
+    return this.userRepo.findAll();
+  }
+
+  async findById(id: number): Promise<Utilisateur | null> {
+    return this.userRepo.findById(id);
+  }
+
+  async update(
+    id: number,
+    data: Partial<Omit<Utilisateur, "id">>
+  ): Promise<Utilisateur> {
+    return this.userRepo.update(id, data);
+  }
+
+  async delete(id: number): Promise<void> {
+    return this.userRepo.delete(id);
+  }
+
+  async login(dataUser: UserLogin) {
+    const user = await this.userRepo.findByEmail(dataUser.email);
+    if (!user) throw new Error("Utilisateur introuvable email incorrect");
+    if (dataUser.password && user.password) {
+      const compare = await bcrypt.compare(dataUser.password, user.password);
+      if (!compare) throw new Error("password incorrect");
+    }
+
+    const token = JWT.sign(
+      {
+        email: user.email,
+        id: user.id,
+      },
+      env.jwt
+    );
+    return { user, token };
+  }
+}
