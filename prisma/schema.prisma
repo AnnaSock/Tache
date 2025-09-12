@@ -30,16 +30,15 @@ enum Etat {
 }
 
 model Utilisateur {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   nom       String
   prenom    String
-  email     String  @unique
+  email     String   @unique
   adresse   String?
   photo     String?
-  login     String  @unique
+  login     String   @unique
   password  String
   telephone String?
   genre     String
-
-  tache Taches[]
+  tache     Taches[]
 }

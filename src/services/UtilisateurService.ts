@@ -33,7 +33,7 @@ export class UtilisateurService {
     return this.userRepo.delete(id);
   }
 
- 
+
 
   async login(dataUser: UserLogin) {
   const user = await this.userRepo.findByEmail(dataUser.email);
@@ -57,4 +57,5 @@ export class UtilisateurService {
 
   return { user, token };
 }
+
 }

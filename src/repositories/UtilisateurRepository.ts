@@ -39,7 +39,7 @@ export class UtilisateurRepository implements IRepository<Utilisateur> {
 
   async findByEmail(email: string): Promise<UserLogin | null> {
     return await prisma.utilisateur.findUnique({
-      select: { email: true, nom: true, prenom: true },
+      select: { email: true, nom: true, prenom: true, password: true, id: true },
       where: { email },
     });
   }
