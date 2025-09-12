@@ -33,21 +33,28 @@ export class UtilisateurService {
     return this.userRepo.delete(id);
   }
 
-  async login(dataUser: UserLogin) {
-    const user = await this.userRepo.findByEmail(dataUser.email);
-    if (!user) throw new Error("Utilisateur introuvable email incorrect");
-    if (dataUser.password && user.password) {
-      const compare = await bcrypt.compare(dataUser.password, user.password);
-      if (!compare) throw new Error("password incorrect");
-    }
+ 
 
-    const token = JWT.sign(
-      {
-        email: user.email,
-        id: user.id,
-      },
-      env.jwt
-    );
-    return { user, token };
+  async login(dataUser: UserLogin) {
+  const user = await this.userRepo.findByEmail(dataUser.email);
+  if (!user) throw new Error("Utilisateur introuvable ou email incorrect");
+
+  if (!dataUser.password || !user.password) {
+    throw new Error("Mot de passe manquant");
   }
+
+  const compare = await bcrypt.compare(dataUser.password, user.password);
+  if (!compare) throw new Error("Mot de passe incorrect");
+
+  const token = JWT.sign(
+    {
+      id: user.id,
+      email: user.email,
+    },
+    env.jwt,
+    { expiresIn: "24h" } 
+  );
+
+  return { user, token };
+}
 }

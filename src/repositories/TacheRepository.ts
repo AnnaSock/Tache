@@ -1,7 +1,6 @@
-import { PrismaClient, Taches } from "@prisma/client";
+import { Taches,Etat} from "@prisma/client";
 import { IRepository } from "./IRepository.js";
-
-const prisma = new PrismaClient();
+import { prisma } from "../config/prisma.js";
 
 export class TacheRepository implements IRepository<Taches> {
   async findAll(): Promise<Taches[]> {
@@ -14,18 +13,18 @@ export class TacheRepository implements IRepository<Taches> {
     });
   }
 
-async create(data: any): Promise<Taches> {
-  return await prisma.taches.create({
-    data: {
-      titre: data.titre,
-      description: data.description,
-      statut: data.statut ?? "EN_COURS",
-      utilisateur: {
-        connect: { id: data.utilisateurId }, // ⚡ assure-toi que c’est toujours un nombre
+ async create(data: Omit<Taches, "id">): Promise<Taches> {
+    return await prisma.taches.create({
+      data: {
+        titre: data.titre,
+        description: data.description,
+        statut: data.statut ?? Etat.EN_COURS, // ✅ enum au lieu de string
+        utilisateur: {
+          connect: { id: data.utilisateurId },
+        },
       },
-    },
-  });
-}
+    });
+  }
 
 
   async update(id: number, data: Partial<Omit<Taches, "id">>): Promise<Taches> {

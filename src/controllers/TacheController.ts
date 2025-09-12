@@ -1,6 +1,7 @@
 import { TacheService } from "../services/TacheService.js";
 import { Request, Response } from "express";
 import { AuthRequest } from "../middlewares/AuthMiddleware.js";
+import { TacheSchema } from "../validators/taches.js";
 export class TacheController {
   private static tacheSer: TacheService = new TacheService();
 
@@ -25,26 +26,33 @@ export class TacheController {
         .json({ status: "error", message: mnError.message });
     }
   }
-
-  static async create(req: AuthRequest, res: Response) {
-    try {
-      const user = req.user;
-      if (!user) {
-        return res.status(401).json({ message: "Utilisateur non trouvé" });
-      }
-
-      const data = {
-        ...req.body,
-        utilisateurId: user.id, // ✅ utilisateur connecté
-      };
-
-      const tache = await this.tacheSer.create(data);
-      res.status(201).json({ status: "success", data: tache });
-    } catch (error: any) {
-      console.error(error);
-      res.status(500).json({ status: "error", message: error.message });
+static async create(req: AuthRequest, res: Response) {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: "Utilisateur non trouvé" });
     }
+
+    const tacheValide = TacheSchema.safeParse(req.body);
+    if (!tacheValide.success) {
+      return res.status(400).json({
+        message: "Erreur Creation",
+        error: tacheValide.error.format,
+      });
+    }
+
+    const data = {
+      ...tacheValide.data,
+      utilisateurId: user.id,
+    };
+
+    const tache = await TacheController.tacheSer.create(data); 
+    res.status(201).json({ status: "success", data: tache });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ status: "error", message: error.message });
   }
+}
 
   static findAll(req: Request, res: Response) {
     return TacheController.handleRequest(res, () => {

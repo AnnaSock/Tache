@@ -1,6 +1,7 @@
 import { UtilisateurService } from "../services/UtilisateurService.js";
 import { Request, Response } from "express";
 import { utilisateurSchema, loginSchema } from "../validators/Utilisateur.js";
+
 export class UtilisateurController {
   private static userSer: UtilisateurService = new UtilisateurService();
 

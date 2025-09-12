@@ -13,7 +13,7 @@ export class TacheService {
       titre: data.titre,
       description: data.description,
       statut: data.statut ?? "EN_COURS",
-      utilisateurId: data.utilisateurId, // ✅ fourni par le controller
+      utilisateurId: data.utilisateurId,
     });
   }
 

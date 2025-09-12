@@ -1,8 +1,8 @@
 import { PrismaClient, Taches, Utilisateur } from "@prisma/client";
 import { IRepository } from "./IRepository.js";
 import { UserLogin } from "../types/typeUser.js";
+import { prisma } from "../config/prisma.js";
 
-const prisma = new PrismaClient();
 
 export class UtilisateurRepository implements IRepository<Utilisateur> {
   async findAll(): Promise<Utilisateur[]> {
