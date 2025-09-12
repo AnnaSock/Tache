@@ -2,7 +2,7 @@ import express from "express";
 import { env } from "./config/env.js";
 import tacheRoute from "./routes/TacheRoute.js";
 import userRoute from "./routes/UtilisateurRoute.js";
-import authentificate from "./middlewares/AuthMiddleware.js";
+import authentificate from "./middlewares/authentificate.js";
 
 const app = express();
 const port = env.port;

@@ -6,7 +6,7 @@ import { prisma } from "../config/prisma.js";
 
 export class UtilisateurRepository implements IRepository<Utilisateur> {
   async findAll(): Promise<Utilisateur[]> {
-    return await prisma.utilisateur.findMany({});
+    return await prisma.utilisateur.findMany();
   }
 
   async findById(id: number): Promise<Utilisateur | null> {
@@ -41,6 +41,13 @@ export class UtilisateurRepository implements IRepository<Utilisateur> {
     return await prisma.utilisateur.findUnique({
       select: { email: true, nom: true, prenom: true, password: true, id: true },
       where: { email },
+    });
+  }
+
+  async saveRefreshToken(userId: number | undefined, refreshToken: string) {
+    return await prisma.utilisateur.update({
+      where: { id: userId },
+      data: {refreshToken: refreshToken },
     });
   }
 }

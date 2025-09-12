@@ -15,12 +15,13 @@ datasource db {
 }
 
 model Taches {
-  id            Int         @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   titre         String
   description   String?
-  statut        Etat        @default(EN_COURS)
+  statut        Etat          @default(EN_COURS)
   utilisateurId Int
-  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
+  utilisateur   Utilisateur   @relation(fields: [utilisateurId], references: [id])
+  autoriseTache Utilisateur[] @relation("tachePermission")
 }
 
 enum Etat {
@@ -30,15 +31,17 @@ enum Etat {
 }
 
 model Utilisateur {
-  id        Int      @id @default(autoincrement())
-  nom       String
-  prenom    String
-  email     String   @unique
-  adresse   String?
-  photo     String?
-  login     String   @unique
-  password  String
-  telephone String?
-  genre     String
-  tache     Taches[]
+  id           Int      @id @default(autoincrement())
+  nom          String
+  prenom       String
+  email        String   @unique
+  adresse      String?
+  photo        String?
+  login        String   @unique
+  password     String
+  telephone    String?
+  genre        String
+  refreshToken String?
+  tache        Taches[]
+  autoriseUser Taches[] @relation("tachePermission")
 }

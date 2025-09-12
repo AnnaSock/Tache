@@ -4,5 +4,6 @@ dotenv.config();
 
 export const env= {
     port: Number(process.env.PORT),
-    jwt: String(process.env.JWT_SECRET)
+    jwt: String(process.env.JWT_SECRET),
+    jwtRefresh: String(process.env.JWT_SECRET_REFRESH)
 }
