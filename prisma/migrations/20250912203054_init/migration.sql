@@ -27,5 +27,21 @@ CREATE TABLE `Utilisateur` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `Permission` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `utilisateurId` INTEGER NOT NULL,
+    `tacheId` INTEGER NOT NULL,
+    `typePermission` ENUM('MODIFIER', 'SUPPRIMER') NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `Taches` ADD CONSTRAINT `Taches_utilisateurId_fkey` FOREIGN KEY (`utilisateurId`) REFERENCES `Utilisateur`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Permission` ADD CONSTRAINT `Permission_utilisateurId_fkey` FOREIGN KEY (`utilisateurId`) REFERENCES `Utilisateur`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Permission` ADD CONSTRAINT `Permission_tacheId_fkey` FOREIGN KEY (`tacheId`) REFERENCES `Taches`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

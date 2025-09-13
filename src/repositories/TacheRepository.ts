@@ -1,4 +1,4 @@
-import { Taches,Etat} from "@prisma/client";
+import { Taches, Etat } from "@prisma/client";
 import { IRepository } from "./IRepository.js";
 import { prisma } from "../config/prisma.js";
 
@@ -13,7 +13,7 @@ export class TacheRepository implements IRepository<Taches> {
     });
   }
 
- async create(data: Omit<Taches, "id">): Promise<Taches> {
+  async create(data: Omit<Taches, "id">): Promise<Taches> {
     return await prisma.taches.create({
       data: {
         titre: data.titre,
@@ -25,7 +25,6 @@ export class TacheRepository implements IRepository<Taches> {
       },
     });
   }
-
 
   async update(id: number, data: Partial<Omit<Taches, "id">>): Promise<Taches> {
     return await prisma.taches.update({

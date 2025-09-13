@@ -10,7 +10,6 @@ export const utilisateurSchema = zod.object({
   password: zod.string().min(1, "le password est requis"),
   telephone: zod.string().min(1, "le telephone est requis"),
   genre: zod.string().min(1, "le genre est requis"),
-  refreshToken: zod.string().min(1, "refresh Token requis"),
   
 });
 

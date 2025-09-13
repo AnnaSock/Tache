@@ -1,4 +1,4 @@
-import { PrismaClient, Taches, Utilisateur } from "@prisma/client";
+import { Utilisateur } from "@prisma/client";
 import { IRepository } from "./IRepository.js";
 import { UserLogin } from "../types/typeUser.js";
 import { prisma } from "../config/prisma.js";
@@ -44,10 +44,5 @@ export class UtilisateurRepository implements IRepository<Utilisateur> {
     });
   }
 
-  async saveRefreshToken(userId: number | undefined, refreshToken: string) {
-    return await prisma.utilisateur.update({
-      where: { id: userId },
-      data: {refreshToken: refreshToken },
-    });
-  }
+  
 }

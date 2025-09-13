@@ -30,7 +30,7 @@ export function authentificate(
       return;
     }
 
-    const payload = JWT.verify(token as string , secret) as any;
+    const payload = JWT.verify(token as string, secret) as any;
 
     req.user = {
       id:

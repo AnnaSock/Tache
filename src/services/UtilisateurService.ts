@@ -61,7 +61,6 @@ export class UtilisateurService {
       env.jwtRefresh,
       { expiresIn: "24h" }
     );
-    await this.userRepo.saveRefreshToken(user.id, refreshtoken);
 
     return { user, token, refreshtoken };
   }
