@@ -22,6 +22,7 @@ model Taches {
   utilisateurId Int
   utilisateur   Utilisateur  @relation(fields: [utilisateurId], references: [id])
   permission    Permission[]
+  historique    Historique[]
 }
 
 enum Etat {
@@ -43,6 +44,7 @@ model Utilisateur {
   genre      String
   tache      Taches[]
   permission Permission[]
+  historique Historique[]
 }
 
 model Permission {
@@ -59,4 +61,24 @@ model Permission {
 enum TypePermission {
   MODIFIER
   SUPPRIMER
+}
+
+
+model Historique {
+  id           Int        @id @default(autoincrement())
+  action       TypeAction
+  dateAction   DateTime   @default(now())
+  
+  utilisateur  Utilisateur @relation(fields: [utilisateurId], references: [id])
+  utilisateurId Int
+
+  tache        Taches     @relation(fields: [tacheId], references: [id])
+  tacheId      Int
+}
+
+
+enum TypeAction {
+  MODIFICATION
+  SUPPRESSION
+  LECTURE
 }

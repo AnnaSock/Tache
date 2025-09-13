@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { TacheService } from "../services/TacheService.js";
 import { AuthRequest } from "./authentificate.js";
 import { PermissionService } from "../services/PermissionService.js";
-import { Permission, TypePermission } from "@prisma/client";
+import { TypePermission } from "@prisma/client";
 
 export class AuthMiddleware {
   private static tacheService: TacheService = new TacheService();
@@ -18,12 +18,10 @@ export class AuthMiddleware {
       return res.status(404).json({ message: "Tâche introuvable" });
     }
 
-    // Si l'utilisateur est propriétaire, il a tous les droits
     if (tache.utilisateurId === utilisateurId) {
       return next();
     }
 
-    // Vérification de la permission explicite
     const typePermission =
       req.method === "PUT" ? TypePermission.MODIFIER : TypePermission.SUPPRIMER;
 
@@ -39,7 +37,6 @@ export class AuthMiddleware {
         .json({ message: "Accès refusé : permission manquante" });
     }
 
-    // Si tout est OK, on continue
     next();
   }
 }
