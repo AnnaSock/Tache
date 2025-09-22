@@ -1,7 +1,10 @@
 import { UtilisateurService } from "../services/UtilisateurService.js";
 import { Request, Response } from "express";
 import { utilisateurSchema, loginSchema } from "../validators/Utilisateur.js";
-
+import JWT from "jsonwebtoken"
+import { env } from "../config/env.js";
+import { prisma } from "../config/prisma.js";
+import { Prisma } from "@prisma/client";
 export class UtilisateurController {
   private static userSer: UtilisateurService = new UtilisateurService();
 
@@ -27,12 +30,49 @@ export class UtilisateurController {
     }
   }
 
+  // static async create(req: Request, res: Response) {
+  //   const valide = utilisateurSchema.safeParse(req.body);
+  //   if (!valide.success)
+  //     return res
+  //       .status(400)
+  //       .json({ message: "Erreur Creation", error: valide.error.format() });
+  //   const userValid = await UtilisateurController.userSer.create(valide.data);
+  //   res.status(200).json(userValid);
+  // }
+
+
   static async create(req: Request, res: Response) {
-      const valide= utilisateurSchema.safeParse(req.body)
-      if (!valide.success) return res.status(400).json({message: "Erreur Creation",error:valide.error.format()})
-      const userValid= await  UtilisateurController.userSer.create(valide.data);
-      res.status(200).json(userValid)
+  const valide = utilisateurSchema.safeParse(req.body);
+  if (!valide.success) {
+    return res.status(400).json({ message: "Erreur de validation", error: valide.error.format() });
   }
+
+  try {
+    const userValid = await UtilisateurController.userSer.create(valide.data);
+    return res.status(201).json(userValid);
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        let conflictedFields = 'champ(s) unique(s)';
+        if (error.meta && error.meta.target) {
+          if (Array.isArray(error.meta.target)) {
+            conflictedFields = error.meta.target.join(', ');
+          } else if (typeof error.meta.target === 'string') {
+            conflictedFields = error.meta.target;
+          }
+        }
+        return res.status(409).json({
+          message: `Conflit : un utilisateur avec ce(s) ${conflictedFields} existe déjà.`,
+          details: error.meta,
+        });
+      }
+    }
+
+    console.error(error);
+    return res.status(500).json({ message: "Erreur serveur interne." });
+  }
+}
+
 
   static findAll(req: Request, res: Response) {
     return UtilisateurController.handleRequest(res, () => {
@@ -62,16 +102,49 @@ export class UtilisateurController {
     });
   }
 
-  static async login(req: Request, res:Response){
+  static async login(req: Request, res: Response) {
     try {
-        const valide=  loginSchema.safeParse(req.body);
-        const user= req.body;
-        if (!valide.success) return res.status(400).json({message: "Erreur Connexion", error: valide.error.format()});
-        const userValid= await UtilisateurController.userSer.login(user) 
-        res.status(200).json({message: "Connexion Reussi", userValid});
+      const valide = loginSchema.safeParse(req.body);
+      const user = req.body;
+      if (!valide.success)
+        return res
+          .status(400)
+          .json({ message: "Erreur Connexion", error: valide.error.format() });
+      const userValid = await UtilisateurController.userSer.login(user);
+      const refreshToken = userValid.refreshtoken;
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: false, 
+        sameSite: "strict",
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+
+      const userToken= userValid.user
+      const token= userValid.token
+      res.status(200).json({ message: "Connexion Reussi", userToken,  token});
     } catch (error: any) {
-        res.status(400).json({message: error.message})
+      res.status(400).json({ message: error.message });
     }
   }
 
+  static async refresh(req: Request, res: Response){
+          try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Pas de refresh token" });
+    }
+
+    const decoded: any = JWT.verify(refreshToken, env.jwtRefresh);
+
+    const accessToken = JWT.sign(
+      { id: decoded.id, email: decoded.email },
+      env.jwt,
+      { expiresIn: "1h" }
+    );
+
+    res.json({ accessToken });
+  } catch (err: any) {
+    res.status(403).json({ message: "Refresh token invalide ou expiré" });
+  }
+  }
 }

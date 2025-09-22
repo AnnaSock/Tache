@@ -27,32 +27,35 @@ export class TacheController {
     }
   }
   static async create(req: AuthRequest, res: Response) {
-    try {
-      const user = req.user;
-      if (!user) {
-        return res.status(401).json({ message: "Utilisateur non trouvé" });
-      }
-
-      const tacheValide = TacheSchema.safeParse(req.body);
-      if (!tacheValide.success) {
-        return res.status(400).json({
-          message: "Erreur Creation",
-          error: tacheValide.error.format,
-        });
-      }
-
-      const data = {
-        ...tacheValide.data,
-        utilisateurId: user.id,
-      };
-
-      const tache = await TacheController.tacheSer.create(data);
-      res.status(201).json({ status: "success", data: tache });
-    } catch (error: any) {
-      console.error(error);
-      res.status(500).json({ status: "error", message: error.message });
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: "Utilisateur non trouvé" });
     }
+
+    // parse lève une erreur si la validation échoue
+    const tacheValide = TacheSchema.parse(req.body);
+
+    const data = {
+      ...tacheValide,
+      utilisateurId: user.id,
+    };
+
+    const tache = await TacheController.tacheSer.create(data);
+    res.status(201).json({ status: "success", data: tache });
+  } catch (error: any) {
+    // gérer l'erreur de parse ou toute autre erreur
+    if (error.name === "ZodError") {
+      return res.status(400).json({
+        message: "Erreur Creation",
+        error: error.format(),
+      });
+    }
+    console.error(error);
+    return res.status(500).json({ status: "error", message: error.message });
   }
+}
+
 
   static findAll(req: Request, res: Response) {
     return TacheController.handleRequest(res, () => {

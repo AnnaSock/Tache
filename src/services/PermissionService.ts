@@ -33,4 +33,33 @@ export class PermissionService {
 
     return await this.permissionRepository.create(createProp);
   }
+
+  async delete(data: { connectId: number; utilisateurId: number; tacheId: number; typePermission: string }) {
+    // Optionnel : vérifier que l'utilisateur connecté est autorisé à supprimer la permission
+    // Par exemple, seulement le propriétaire de la tâche
+    const permission = await this.permissionRepository.findByProp({
+      utilisateurId: data.utilisateurId,
+      tacheId: data.tacheId,
+      typePermission: data.typePermission as TypePermission
+    });
+
+    if (!permission) return null;
+
+    // Ici tu peux ajouter une vérification :
+    // if (permission.tache.utilisateurId !== data.connectId) throw new Error("Pas autorisé");
+
+    return await this.permissionRepository.delete({
+      utilisateurId: data.utilisateurId,
+      tacheId: data.tacheId,
+      typePermission: data.typePermission as  TypePermission
+    });
+  }
+
+  async getAll(): Promise<Permission[]> {
+    const permissions = await this.permissionRepository.findAll();
+    if (!permissions || permissions.length === 0) {
+      throw new Error("Aucune permission trouvée");
+    }
+    return permissions;
+  }
 }

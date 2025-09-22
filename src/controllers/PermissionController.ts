@@ -27,7 +27,45 @@ private static permissionService = new PermissionService();
     } catch (error: any) {
       res.status(400).json({ status: "error", message: error.message });
     }
+  }    // Supprimer la permission
+
+
+  static async deletePermission(req: AuthRequest, res: Response){
+    try {
+      const connectId = req.user?.id; // utilisateur connecté
+      const { utilisateurId, tacheId, typePermission } = req.body;
+
+      if (!connectId) {
+        return res.status(401).json({ message: "Non authentifié" });
+      }
+
+      // Appel du service
+      const deleted = await PermissionController.permissionService.delete({
+        connectId,
+        utilisateurId,
+        tacheId,
+        typePermission
+      });
+
+      if (!deleted) {
+        return res.status(404).json({ message: "Permission non trouvée" });
+      }
+
+      res.status(200).json({ status: "success", data: deleted });
+    } catch (error: any) {
+      res.status(400).json({ status: "error", message: error.message });
+    }
   }
+
+  static async getAll(req: Request, res: Response): Promise<void>{
+    try {
+      const permissions = await PermissionController.permissionService.getAll();
+      res.status(200).json(permissions);
+    } catch (error: any) {
+      res.status(404).json({ message: error.message });
+    }
+  }
+  
 
 
 

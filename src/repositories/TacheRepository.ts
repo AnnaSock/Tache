@@ -4,8 +4,13 @@ import { prisma } from "../config/prisma.js";
 
 export class TacheRepository implements IRepository<Taches> {
   async findAll(): Promise<Taches[]> {
-    return await prisma.taches.findMany();
-  }
+  return await prisma.taches.findMany({
+    include: {
+      utilisateur: true,
+    },
+  });
+}
+
 
   async findById(id: number): Promise<Taches | null> {
     return await prisma.taches.findUnique({
@@ -18,11 +23,14 @@ export class TacheRepository implements IRepository<Taches> {
       data: {
         titre: data.titre,
         description: data.description,
-        statut: data.statut ?? Etat.EN_COURS, // ✅ enum au lieu de string
         utilisateur: {
-          connect: { id: data.utilisateurId },
+          connect: { id: data.utilisateurId,
+                     
+           },
         },
+        
       },
+     
     });
   }
 

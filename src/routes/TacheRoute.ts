@@ -8,8 +8,15 @@ const tacheController = new TacheController();
 tacheRoute.post("/", TacheController.create.bind(tacheController));
 tacheRoute.get("/", TacheController.findAll.bind(tacheController));
 tacheRoute.get("/:id", TacheController.findById.bind(tacheController));
-tacheRoute.put("/:id", AuthMiddleware.autorizate ,TacheController.update.bind(tacheController));
-tacheRoute.delete("/:id",AuthMiddleware.autorizate, TacheController.delete.bind(tacheController));
-// tacheRoute.post("/:id/permission");
+tacheRoute.put(
+  "/:id",
+  AuthMiddleware.autorizate,
+  TacheController.update.bind(tacheController)
+);
+tacheRoute.delete(
+  "/:id",
+  AuthMiddleware.autorizate,
+  TacheController.delete.bind(tacheController)
+);
 
 export default tacheRoute;

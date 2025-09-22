@@ -18,7 +18,7 @@ model Taches {
   id            Int          @id @default(autoincrement())
   titre         String
   description   String?
-  statut        Etat         @default(EN_COURS)
+  statut        Etat?        @default(EN_COURS)
   utilisateurId Int
   utilisateur   Utilisateur  @relation(fields: [utilisateurId], references: [id])
   permission    Permission[]
@@ -39,9 +39,9 @@ model Utilisateur {
   adresse    String?
   photo      String?
   login      String       @unique
-  password   String
-  telephone  String?
-  genre      String
+  password   String       @unique
+  telephone  Int?         @unique
+  genre      Genre?
   tache      Taches[]
   permission Permission[]
   historique Historique[]
@@ -63,19 +63,22 @@ enum TypePermission {
   SUPPRIMER
 }
 
-
-model Historique {
-  id           Int        @id @default(autoincrement())
-  action       TypeAction
-  dateAction   DateTime   @default(now())
-  
-  utilisateur  Utilisateur @relation(fields: [utilisateurId], references: [id])
-  utilisateurId Int
-
-  tache        Taches     @relation(fields: [tacheId], references: [id])
-  tacheId      Int
+enum Genre {
+  HOMME
+  FEMME
 }
 
+model Historique {
+  id         Int        @id @default(autoincrement())
+  action     TypeAction
+  dateAction DateTime   @default(now())
+
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
+  utilisateurId Int
+
+  tache   Taches @relation(fields: [tacheId], references: [id])
+  tacheId Int
+}
 
 enum TypeAction {
   MODIFICATION
