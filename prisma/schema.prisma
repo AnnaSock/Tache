@@ -16,8 +16,11 @@ datasource db {
 
 model Taches {
   id            Int          @id @default(autoincrement())
-  titre         String
+  titre         String?
   description   String?
+  audioPath     String?
+  dateDebut     DateTime?
+  dateFin       DateTime?
   statut        Etat?        @default(EN_COURS)
   utilisateurId Int
   utilisateur   Utilisateur  @relation(fields: [utilisateurId], references: [id])

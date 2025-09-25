@@ -26,42 +26,57 @@ export class TacheController {
         .json({ status: "error", message: mnError.message });
     }
   }
+
   static async create(req: AuthRequest, res: Response) {
   try {
     const user = req.user;
-    if (!user) {
-      return res.status(401).json({ message: "Utilisateur non trouvé" });
-    }
+    if (!user) return res.status(401).json({ message: "Utilisateur non trouvé" });
 
-    // parse lève une erreur si la validation échoue
+    // Validation Zod sur req.body (champs texte)
     const tacheValide = TacheSchema.parse(req.body);
+
+    // Recuperer audioPath depuis req.file si upload Multer
+    const audioPath = req.file ? req.file.path : null;
 
     const data = {
       ...tacheValide,
+      audioPath,
+      dateDebut: req.body.dateDebut ? new Date(req.body.dateDebut) : null,
+      dateFin: req.body.dateFin ? new Date(req.body.dateFin) : null,
       utilisateurId: user.id,
     };
 
     const tache = await TacheController.tacheSer.create(data);
     res.status(201).json({ status: "success", data: tache });
   } catch (error: any) {
-    // gérer l'erreur de parse ou toute autre erreur
     if (error.name === "ZodError") {
-      return res.status(400).json({
-        message: "Erreur Creation",
-        error: error.format(),
-      });
+      return res.status(400).json({ message: "Erreur création", error: error.format() });
     }
     console.error(error);
-    return res.status(500).json({ status: "error", message: error.message });
+    res.status(500).json({ status: "error", message: error.message });
   }
 }
 
-
-  static findAll(req: Request, res: Response) {
+static findAll(req: Request, res: Response) {
     return TacheController.handleRequest(res, () => {
-      return TacheController.tacheSer.findAll();
+      return TacheController.tacheSer.findAll(req);
     });
   }
+
+
+
+//   static async findAll(req: Request, res: Response) {
+//   return TacheController.handleRequest(res, async () => {
+//     const taches = await TacheController.tacheSer.findAll();
+//     taches.forEach(tache => {
+//       if (tache.audioPath) {
+//         tache.audioPath = `${req.protocol}://${req.get('host')}/uploads/${tache.audioPath}`;
+//       }
+//     });
+//     return taches;
+//   });
+// }
+
 
   static findById(req: Request, res: Response) {
     return TacheController.handleRequest(res, () => {
@@ -82,6 +97,32 @@ export class TacheController {
     return TacheController.handleRequest(res, () => {
       const id = Number(req.params.id);
       return TacheController.tacheSer.delete(id);
+    });
+  }
+
+  // static async findByUserId(req: AuthRequest, res: Response) {
+  //   try {
+  //     if (!req.user?.id) {
+  //       return res.status(401).json({ message: "Utilisateur non authentifié" });
+  //     }
+  //     const userId = req.user.id;
+  //     const tasks = await TacheController.tacheSer.findByUserId(userId);
+  //     res.status(200).json(tasks);
+  //   } catch (error) {
+  //     console.error(error);
+  //     res.status(500).json({ message: "Erreur serveur" });
+  //   }
+  // }
+
+  static findAllByUserId(req: AuthRequest, res: Response): Promise<void> {
+    return TacheController.handleRequest(res, async () => {
+      if (req.user) {
+        const userId = req.user.id;
+        // Toujours retourner une promesse ici, pas undefined
+        return await TacheController.tacheSer.findAllByUserId(userId);
+      }
+      // Si pas d'utilisateur, on peut lancer une erreur, ou retourner un tableau vide
+      return [];
     });
   }
 }

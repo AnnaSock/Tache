@@ -4,7 +4,24 @@ import { UtilisateurController } from "../controllers/UtilisateurController.js";
 const userRoute = Router();
 const utilisateurController = new UtilisateurController();
 
-userRoute.post("/", UtilisateurController.create.bind(utilisateurController));
+import multer from 'multer';
+import path from 'path';
+
+// Config Multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads'); // dossier de stockage
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage });
+
+userRoute.post("/", upload.single('photo'), UtilisateurController.create.bind(utilisateurController));
+
 userRoute.post(
   "/login",
   UtilisateurController.login.bind(utilisateurController)

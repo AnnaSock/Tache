@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { UserLogin } from "../types/typeUser.js";
 import JWT from "jsonwebtoken";
 import { env } from "../config/env.js";
+import { Request } from "express";
 
 export class UtilisateurService {
   private userRepo: UtilisateurRepository = new UtilisateurRepository();
@@ -14,8 +15,12 @@ export class UtilisateurService {
     return newUser;
   }
 
-  async findAll(): Promise<Utilisateur[]> {
-    return this.userRepo.findAll();
+  async findAll(req: Request): Promise<Utilisateur[]> {
+    const users= await this.userRepo.findAll()
+    users.map((user)=>{
+          if (user.photo) user.photo=`${req.protocol}://${req.get("host")}/uploads/${user.photo}`
+    })
+    return users;
   }
 
   async findById(id: number): Promise<Utilisateur | null> {
